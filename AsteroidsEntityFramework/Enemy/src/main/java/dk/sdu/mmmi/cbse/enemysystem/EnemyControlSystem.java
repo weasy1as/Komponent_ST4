@@ -1,20 +1,23 @@
 package dk.sdu.mmmi.cbse.enemysystem;
 
-import dk.sdu.mmmi.cbse.bulletsystem.BulletControlSystem;
+import dk.sdu.mmmi.cbse.common.bullet.BulletSPI;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.data.entityparts.LifePart;
 import dk.sdu.mmmi.cbse.common.data.entityparts.MovingPart;
 import dk.sdu.mmmi.cbse.common.data.entityparts.PositionPart;
-import dk.sdu.mmmi.cbse.common.enemy.Enemy;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
+
+import java.util.Collection;
 import java.util.Random;
+import java.util.ServiceLoader;
+
+import static java.util.stream.Collectors.toList;
 
 public class EnemyControlSystem implements IEntityProcessingService {
 
     private Entity enemy;
-    BulletControlSystem bullet= new BulletControlSystem();
 
 
     @Override
@@ -41,10 +44,11 @@ public class EnemyControlSystem implements IEntityProcessingService {
                 movingPart.setRight(true);
             }
 
-            if (rng > 0.8f) {
-
+            /** bullet for enemy*/
+            if (rng > 0.9f) {
+                for (BulletSPI bullet : getBulletSPIs()) {
                     world.addEntity(bullet.createBullet(enemy, gameData));
-
+                }
             }
 
             movingPart.process(gameData, enemy);
@@ -57,6 +61,10 @@ public class EnemyControlSystem implements IEntityProcessingService {
             movingPart.setLeft(false);
             movingPart.setUp(false);
         }
+    }
+
+    private Collection<? extends BulletSPI> getBulletSPIs() {
+        return ServiceLoader.load(BulletSPI.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 
     private void updateShape(Entity entity) {

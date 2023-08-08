@@ -5,25 +5,28 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import dk.sdu.mmmi.cbse.asteroid.AsteroidPlugin;
-import dk.sdu.mmmi.cbse.asteroid.AsteroidProcessor;
-import dk.sdu.mmmi.cbse.bulletsystem.BulletControlSystem;
-import dk.sdu.mmmi.cbse.collisionsystem.CollisionDetector;
+//import dk.sdu.mmmi.cbse.asteroid.AsteroidPlugin;
+//import dk.sdu.mmmi.cbse.asteroid.AsteroidProcessor;
+//import dk.sdu.mmmi.cbse.bulletsystem.BulletControlSystem;
+//import dk.sdu.mmmi.cbse.collisionsystem.CollisionDetector;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
-import dk.sdu.mmmi.cbse.common.util.SPILocator;
-import dk.sdu.mmmi.cbse.enemysystem.EnemyControlSystem;
-import dk.sdu.mmmi.cbse.enemysystem.EnemyPlugin;
+//import dk.sdu.mmmi.cbse.common.util.SPILocator;
+//import dk.sdu.mmmi.cbse.enemysystem.EnemyControlSystem;
+//import dk.sdu.mmmi.cbse.enemysystem.EnemyPlugin;
 import dk.sdu.mmmi.cbse.managers.GameInputProcessor;
-import dk.sdu.mmmi.cbse.playersystem.PlayerControlSystem;
-import dk.sdu.mmmi.cbse.playersystem.PlayerPlugin;
+//import dk.sdu.mmmi.cbse.playersystem.PlayerControlSystem;
+//import dk.sdu.mmmi.cbse.playersystem.PlayerPlugin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.ServiceLoader;
+
+import static java.util.stream.Collectors.toList;
 
 public class Game
         implements ApplicationListener {
@@ -32,9 +35,6 @@ public class Game
     private ShapeRenderer sr;
 
     private final GameData gameData = new GameData();
-    private List<IEntityProcessingService> entityProcessors = new ArrayList<>();
-    private List<IGamePluginService> entityPlugins = new ArrayList<>();
-    private List<IPostEntityProcessingService> entityPostProcessors = new ArrayList<>();
     private World world = new World();
 
     @Override
@@ -57,9 +57,6 @@ public class Game
         for (IGamePluginService iGamePlugin : getPluginServices()) {
             iGamePlugin.start(gameData, world);
         }
-
-
-
     }
 
     @Override
@@ -99,8 +96,8 @@ public class Game
             float[] shapey = entity.getShapeY();
 
             for (int i = 0, j = shapex.length - 1;
-                    i < shapex.length;
-                    j = i++) {
+                 i < shapex.length;
+                 j = i++) {
 
                 sr.line(shapex[i], shapey[i], shapex[j], shapey[j]);
             }
@@ -124,16 +121,19 @@ public class Game
     @Override
     public void dispose() {
     }
+//How to access
 
     private Collection<? extends IGamePluginService> getPluginServices() {
-        return SPILocator.locateAll(IGamePluginService.class);
+        return ServiceLoader.load(IGamePluginService.class).stream().map(ServiceLoader
+                .Provider::get).collect(toList());
     }
-
     private Collection<? extends IEntityProcessingService> getEntityProcessingServices() {
-        return SPILocator.locateAll(IEntityProcessingService.class);
+        return ServiceLoader.load(IEntityProcessingService.class).stream().map(ServiceLoader.
+                Provider::get).collect(toList());
     }
-
     private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
-        return SPILocator.locateAll(IPostEntityProcessingService.class);
+        return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader
+                .Provider::get).collect(toList());
     }
 }
+
